@@ -7,7 +7,7 @@ This project looks at dirmetology images of skin lesions and classifies them int
 
 ## Steps to follow along
 - Fork the repository
-- Download the data from https://www.kaggle.com/c/siim-isic-melanoma-classification/data?select=tfrecords
+- Download the data from https://www.kaggle.com/c/siim-isic-melanoma-classification/data?select=tfrecords <br />
     (This version is a larger dataset than the ones available at: ISIC &  Dataverse) //embed these links
 - Run configure_data.sh targeting your download from the project root directory
 - Run runtime.py
@@ -16,8 +16,8 @@ This project looks at dirmetology images of skin lesions and classifies them int
 
 ## Tour of the Repository
 - notebooks contains exploratory tests of the code that became the src code
-- src contains 
-  Pipeline.py: A class used to load and preprocess data for the model
-  Model.py: A class used to easily configure the CNN
-  runtime.py: A file used to cleanly create and test a model
+- src contains <br />
+  Pipeline.py: A class used to load and preprocess data for the model <br />
+  Model.py: A class used to easily configure the CNN <br />
+  runtime.py: A file used to cleanly create and test a model <br />
 - data will be created from configure_data.sh after you download the data
