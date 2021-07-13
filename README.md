@@ -6,18 +6,18 @@
 This project looks at dirmetology images of skin lesions and classifies them into one of 7 categories.
 
 ## Steps to follow along
-+Fork the repository
-+Download the data from https://www.kaggle.com/c/siim-isic-melanoma-classification/data?select=tfrecords
+- Fork the repository
+- Download the data from https://www.kaggle.com/c/siim-isic-melanoma-classification/data?select=tfrecords
     (This version is a larger dataset than the ones available at: ISIC &  Dataverse) //embed these links
-+Run configure_data.sh targeting your download from the project root directory
-+Run runtime.py
+- Run configure_data.sh targeting your download from the project root directory
+- Run runtime.py
     (Note this will take a while the first time you run it, as there will be no previously saved model
-+Configure settings as desired in runtime.py
+- Configure settings as desired in runtime.py
 
 ## Tour of the Repository
-+notebooks contains exploratory tests of the code that became the src code
-+src contains 
+- notebooks contains exploratory tests of the code that became the src code
+- src contains 
   Pipeline.py: A class used to load and preprocess data for the model
   Model.py: A class used to easily configure the CNN
   runtime.py: A file used to cleanly create and test a model
-+data will be created from configure_data.sh after you download the data
+- data will be created from configure_data.sh after you download the data
