@@ -4,9 +4,11 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from keras_tuner.tuners import RandomSearch
+from tensorflow.python.data.ops.dataset_ops import make_one_shot_iterator
+from datetime import date
 
 
-class Model():
+class ModelWorker():
     """
     A Convolutional Neural Network class wrapper for tf.keras
     """
@@ -14,40 +16,77 @@ class Model():
         """
         Initialize the CNN with data
         """
-        #take in train,val,test from pipeline
+        self.pipe = pipeline
+        self.model = None
+        self.hp_dict = {}
         pass
-    def build_model(self):
+    def register_hp(self,name):
+        """
+        Passes model_hp to dictionary {'name':[]}
+        """
+        self.hp_dict[name] = []
+        pass
+    def build_model(self,):
         """
         Create the model that will be used
         """
-        pass
+        model = keras.Sequential()
+    
+        # model.add(keras.layers.AveragePooling2D(6,3,input_shape=(300,300,1)))
+        # model.add(input_layer = Input(shape=x.shape[1:]))
+        model.add(keras.layers.Conv2D(32,kernel_size=(3,3),activation='relu',input_shape=(32,32,3)))
+        model.add(keras.layers.MaxPool2D(pool_size=(2,2)))    
+        model.add(keras.layers.Conv2D(32,kernel_size=(3,3),activation='relu'))
+        model.add(keras.layers.MaxPool2D(pool_size=(2,2)))    
+        model.add(keras.layers.Conv2D(32,kernel_size=(3,3),activation='relu'))
+        model.add(keras.layers.MaxPool2D(pool_size=(2,2)))    
+
+        model.add(keras.layers.Dropout(0.5))            
+        model.add(keras.layers.Flatten())
+        # if(self.hp is not None):   
+        #     model.add(keras.layers.Dense(hp.Choice('dense_layer',[64,128,256,512,1024]),activation='relu'))   
+        model.add(keras.layers.Dense(128,activation='relu'))    
+        model.add(keras.layers.Dense(7,activation='softmax'))
+        
+        model.compile(optimizer='adam',
+                loss=keras.losses.CategoricalCrossentropy(),
+                metrics=[keras.metrics.Accuracy(),keras.metrics.Precision(),keras.metrics.Recall()])#create parameter for
+        
+        return model
     def train(self):
         """
-        Run fitting of the model
+        Run fitting of the model on a cross validated run
         """
-        #take in cross val data and or batch data
         pass
-    def report(self):
+    def report(self,metrics):
         """
         Create a text file containing all the metrics used to score
         Return a list of length k for: TP,FP,TN,FN (Confusion Matrix)
         """
-        # send a report to a text file with all the info about the model (se other metrics)
-        pass
+        report_sum = self.model.Summary()
+        report_scores = metrics
+        
+        rep_full = report_sum + '\n' + report_scores + '\n'
+        
+        file_name = date.today() + '.txt'
+        
+        f = open(file_name, "w")
+        f.write(rep_full)
+        f.close()
     def evaluate(self):
         """
         Test the model and return a report
         Args:
         eval_type = 'Val' | 'Test'
         """
-        # check the model against val or test data
+        self.report()
+
         pass
     def tune(self):
         """
         Use the parameter tuning hooks to pass in paramter sets
         """
-        #run hyper parameter tuning of the model
-        #run train variants using specific parameters
+        
         pass
     def save(self):
         """
@@ -59,6 +98,34 @@ class Model():
         Load the model stored in the directory
         """
         pass
+    def demo(self):
+        """
+        run a basic pass on a small data set
+        """
+        a = self.pipe.execute(count=1000)
+        model = self.build_model()
+        # X_train = list(map(lambda x: x[0], b))
+        # y_train = list(map(lambda x: x[1], b))
+        # model.fit(X_train,y_train)
+        print(model.summary())
+
+        BATCH_SIZE = 50
+        # train_data = a.batch(BATCH_SIZE)#list(map(lambda x: x[0], a.batch(BATCH_SIZE)))
+        validation_data = a#.take(1)#.batch(BATCH_SIZE)#list(map(lambda x: x[0], b.batch(BATCH_SIZE))) 
+        # validation_data = validation_data.set_shape([32,32,3])
+        # print('validationdata  ' , validation_data)
+        # print('validationdata  ' , validation_data.next())
+        # .make_one_shot_iterator()
+
+        print('starting fit')
+        model.fit(validation_data, steps_per_epoch=self.pipe.len // 128,epochs=1, validation_data=validation_data,validation_steps=1,verbose=True)
+        print('ending fit')
+        
+        arg = np.argmax(model.predict(validation_data), axis=1)[0]
+        print( 'pred ______________',arg)
+        print(self.pipe.classes[arg])
+
+        
 
 
 #reference code from other project
