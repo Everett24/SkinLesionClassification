@@ -7,10 +7,12 @@ import tensorflow as tf
 # import matplotlib.image as mpimg
 # import tensorflow_datasets as tfds 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from sklearn.model_selection import train_test_split
 import os
 import cv2
 from glob import glob
 from keras.utils.np_utils import to_categorical
+from tensorflow.python.ops.gen_array_ops import split
 # init pipeline with train and test dirs
 #   split train into validate
 # load all the images for train,val,test
@@ -23,6 +25,7 @@ from keras.utils.np_utils import to_categorical
 #load df and prep
 #load labels and prep
 #create image generator
+#init take paramters for batch and for count and for 
 class DataPipeline():
     """
     A class used for creating pipelines loading image data for classification
@@ -31,161 +34,64 @@ class DataPipeline():
         """
         Initialize the pipeline
         """
-        
 
-    def load_data(self,root,count): 
+    def load_df(self,path): 
         """
         Get the data from the directories; filterable
         """
-        self.df = pd.read_csv('./data/HAM10000_metadata')
-        self.df = self.df.drop_duplicates(subset=['lesion_id'])
-        classes = self.df['dx'].unique().tolist()
-
-        # this needs to be filtered first to account for imbalanced data before it can be taken forward [:count] will not suffice
-
-        labels = self.df['dx'].apply(lambda x: classes.index(x)).tolist()[:count]
-        paths = self.df['image_id'].apply(lambda x: x + '.jpg').tolist()[:count]
-        print(labels)
-        print('paths',len(paths))
-        images=[]
-        for file in paths:
-            images.append(glob(os.path.join(root,'HAM10000_images/' + file)))
-        return images, labels
-
-    def read_image(self,path):
-        """
-        Turn a path into an image
-        """
-        x = cv2.imread(path,cv2.IMREAD_COLOR)
-        x = cv2.resize(x,(32,32))
-        x = x/255.0
-        x = x.astype(np.float32)
-        return x
-
-    def preprocess(self,x,y):
-        """
-        Process x data from file paths to images, resize those images
-        """
-        def f(x,y):
-            """
-            das
-            """
-            x = x[0].decode()
-            x = self.read_image(x)
-            return x,y
-        img,label = tf.numpy_function(f,[x,y],[tf.float32,tf.int32])
-        img.set_shape([32,32,3])
-        # y = tf.one_hot(tf.cast(label, tf.uint8), 7)
-        # y = tf.cast(tf.one_hot(tf.cast(y, tf.int32), 7), dtype=y.dtype)
-        # y = to_categorical(y, num_classes=7)
-
-        return img,label
-
-    def tf_dataset(self,x,y,batch=8):
-        """
-        Make a TF Dataset from the provided X,y data
-
-        Arguments:
-        x: numpy array of images
-        y: numpy array of class ids
+        df = pd.read_csv(path)
+        df = df.drop_duplicates(subset=['lesion_id'])
+        df['image_id'] = df['image_id'].apply(lambda x: x + '.jpg')
+        #find a better place to do this
+        df = df.drop(df[df['dx'] == 'nv'].sample(frac=0.85).index)
+        self.classes = df['dx'].unique().tolist()
+        self.weights = df.groupby('dx').size()/df.shape[0]
+        self.len = len(df['dx'].values)
+        df = df.drop(['lesion_id','dx_type','age','sex','localization','dataset'],axis=1)
+        return df
         
-        Returns:
-        TF Dataset
-        """
-        self.len = len(x)
-        ds = tf.data.Dataset.from_tensor_slices((x,y))#.repeat()
-        # print(ds)
-        ds = ds.shuffle(buffer_size=1000)
-        ds = ds.map(self.preprocess) #.as_numpy_iterator()
-        ds = ds.batch(batch,drop_remainder=True)
-        ds = ds.map(self._fixup_shape)
+    def get_all_data_gen(self):
+        train_full = self.load_df('./data/HAM10000_metadata')
+        train_generator = self.get_img_gen(train_full,'image_id','dx','data/HAM10000_images' )
+        return train_generator
         
-        # ds = ds.repeat()
-        # ds = ds.prefetch(tf.contrib.data.AUTOTUNE)
-        # print(ds)
-        ds = ds.prefetch(2)
-        return ds
-    def _fixup_shape(self,images, labels):
-        images.set_shape([None, None, None, 3])
-        labels.set_shape([None, 7]) # I have 19 classes
-        return images, labels
-    def execute(self,count=100,log_image=False):
+    def execute(self):
         """
         Load data and Return a Dataset
         log_image=True : print an image before dataset and test loop
-        ->input in cli? 
         """
+        train_full = self.load_df('./data/HAM10000_metadata')
+        #train_full = train_full.sample(500)
+        train_split,  test =  train_test_split(train_full,shuffle=False,test_size=.2)
+        #train,val = train_test_split(train_split,shuffle=False,test_size=.2)
         
+        train_generator = self.get_img_gen(train_split,'image_id','dx','data/HAM10000_images' )
+        #val_generator = self.get_img_gen(val,'image_id','dx','data/HAM10000_images')
+        test_generator = self.get_img_gen(test,'image_id','dx','data/HAM10000_images')
 
-        # imgs,labels = self.load_data('data/',count) #these are only training data
-        # test_imgs, test_labels = self.load_data('data/',count) #these are only training data
-        # #-> tests unavailable at the moment new dataset is required
-
-        ""
-        self.df = pd.read_csv('./data/HAM10000_metadata')
-        self.df = self.df.drop_duplicates(subset=['lesion_id'])
-        self.classes = self.df['dx'].unique().tolist()
-        print(self.classes)
-        # this needs to be filtered first to account for imbalanced data before it can be taken forward [:count] will not suffice
-
-        # labels
-        # self.df['dx'] = self.df['dx'].apply(lambda x: classes.index(x)).tolist() #[:count]
-        # paths
-        self.df['dx'] = self.df['dx'].map(str)
-        self.df['image_id'] = self.df['image_id'].apply(lambda x: x + '.jpg') #[:count]
-        self.df.set_index('image_id')
-        # print(self.df['dx'].dtype)
-        # print(self.df['dx'].values)
-        self.len = len(self.df['dx'].values)
-        #, ds_val
-        test_datagen = ImageDataGenerator(rescale=1./255)
-        test_generator = test_datagen.flow_from_dataframe(
-            dataframe=self.df,
-            directory='data/HAM10000_images/',
-            x_col ='image_id',
-            y_col ='dx',
-            color_mode="rgb",
-            target_size=(32, 32),
-            batch_size=128,
-            validate_filenames=False,
-            shuffle=False)
-        # print('hahahahahahaha',test_generator.classes)
-
-        # ds_train = self.tfdata_generator(imgs,labels,is_training=True)#
-        # ds_train = self.train_val_split(imgs,labels,split=.2)
-        #
-        # ds_test = self.tf_dataset(test_imgs,test_labels)
-        return test_generator#ds_train#, ds_val, ds_test
+        return train_generator,test_generator #val_generator
     
-
-    def tfdata_generator(self,images, labels, is_training, batch_size=128):
-        '''Construct a data generator using `tf.Dataset`. '''
-        def map_fn(image, label):
-            '''Preprocess raw data to trainable input. '''
-            print(image)
-            print(label)
-            x = tf.reshape(tf.cast(image, tf.float32), (28, 28, 1))
-            y = tf.one_hot(tf.cast(label, tf.uint8), 7)
-            return x, y
-        
-        dataset = tf.data.Dataset.from_tensor_slices((images, labels))
-        # print(dataset)
-        if is_training:
-            dataset = dataset.shuffle(1000)  # depends on sample size
-        dataset = dataset.map(map_fn)
-        dataset = dataset.batch(batch_size)
-        dataset = dataset.repeat()
-        dataset = dataset.prefetch(tf.contrib.data.AUTOTUNE)
-
-        return dataset 
-    def train_val_split(self,imgs,labels,split): # set this up
-        """
-        Return a a dataset for train,validate and test
-        """
-        s = int(len(imgs)*split)
-        ds_train = self.tf_dataset(imgs[:s],labels[:s])
-        ds_val = self.tf_dataset(imgs[s:],labels[s:])
-        # get the train data and split it
-        # get the test data and format it
-        # return 3 X,y pairs
-        return ds_train#, ds_val 
+    def get_img_gen(self,df, x,y,dir,sub=None):
+        test_datagen = ImageDataGenerator( 
+            rotation_range=40,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            rescale=1./255,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True,
+            vertical_flip=True,
+            fill_mode='nearest')
+        test_generator = test_datagen.flow_from_dataframe(
+            dataframe=df,
+            directory=dir,
+            x_col =x,
+            y_col =y,
+            color_mode="rgb",
+            target_size=(256, 256),
+            batch_size=100,
+            classes=self.classes,
+            validate_filenames=False,
+            shuffle=True,
+            subset=sub)
+        return test_generator
