@@ -21,4 +21,6 @@ This project looks at dirmetology images of skin lesions and classifies them as 
 - src contains <br />
   Pipeline.py: A class used to load and preprocess data for the model <br />
   Model.py: A class used to easily configure the CNN <br />
+  Binary_Pipeline.py: A class used to load and preprocess binary data for the model <br />
+  Bnary_Model.py: A class used to easily configure the binary CNN <br />
   runtime.py: A file used to cleanly create and test a model <br />
