@@ -13,6 +13,7 @@ import cv2
 from glob import glob
 from keras.utils.np_utils import to_categorical
 from tensorflow.python.ops.gen_array_ops import split
+
 # init pipeline with train and test dirs
 #   split train into validate
 # load all the images for train,val,test
@@ -26,7 +27,7 @@ from tensorflow.python.ops.gen_array_ops import split
 #load labels and prep
 #create image generator
 #init take paramters for batch and for count and for 
-class DataPipeline():
+class BinaryDataPipeline():
     """
     A class used for creating pipelines loading image data for classification
     """
@@ -40,19 +41,20 @@ class DataPipeline():
         Get the data from the directories; filterable
         """
         df = pd.read_csv(path)
-        df = df.drop_duplicates(subset=['lesion_id'])
-        df['image_id'] = df['image_id'].apply(lambda x: x + '.jpg')
+        print(df.shape[0])
+        
+        df = df.drop_duplicates(subset=['patient_id'])
+        df['image_name'] = df['image_name'].apply(lambda x: x + '.jpg')
         #find a better place to do this
-        df = df.drop(df[df['dx'] == 'nv'].sample(frac=0.85).index)
-        self.classes = df['dx'].unique().tolist()
-        self.weights = df.groupby('dx').size()/df.shape[0]
-        self.len = len(df['dx'].values)
-        df = df.drop(['lesion_id','dx_type','age','sex','localization','dataset'],axis=1)
+        self.classes = df['benign_malignant'].unique().tolist()
+        # self.weights = df.groupby('benign_malignant').size()/df.shape[0]
+        self.len = len(df['benign_malignant'].values)
+        print(self.len)
         return df
         
     def get_all_data_gen(self):
-        train_full = self.load_df('./data/HAM10000_metadata')
-        train_generator = self.get_img_gen(train_full,'image_id','dx','data/HAM10000_images' )
+        train_full = self.load_df('./data/train.csv')
+        train_generator = self.get_img_gen(train_full,'image_name','benign_malignant','data/jpeg/train/' )
         return train_generator
 
     def execute(self):
@@ -60,14 +62,14 @@ class DataPipeline():
         Load data and Return a Dataset
         log_image=True : print an image before dataset and test loop
         """
-        train_full = self.load_df('./data/HAM10000_metadata')
+        train_full = self.load_df('./data/train.csv')
         #train_full = train_full.sample(500)
         train_split,  test =  train_test_split(train_full,shuffle=False,test_size=.2)
         train,val = train_test_split(train_split,shuffle=False,test_size=.2)
         
-        train_generator = self.get_img_gen(train,'image_id','dx','data/HAM10000_images' )
-        val_generator = self.get_img_gen(val,'image_id','dx','data/HAM10000_images')
-        test_generator = self.get_img_gen(test,'image_id','dx','data/HAM10000_images')
+        train_generator = self.get_img_gen(train,'image_name','benign_malignant','data/jpeg/train/' )
+        val_generator = self.get_img_gen(val,'image_name','benign_malignant','data/jpeg/train/')
+        test_generator = self.get_img_gen(test,'image_name','benign_malignant','data/jpeg/train/')
 
         return train_generator,val_generator,test_generator #val_generator
     
@@ -88,9 +90,9 @@ class DataPipeline():
             x_col =x,
             y_col =y,
             color_mode="rgb",
-            target_size=(256, 256),
-            batch_size=200,
-            classes=self.classes,
+            target_size=(64, 64),
+            batch_size=32,
+            class_mode='binary',
             validate_filenames=False,
             shuffle=True,
             subset=sub)

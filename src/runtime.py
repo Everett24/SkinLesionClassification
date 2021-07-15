@@ -1,5 +1,7 @@
 from Model import ModelWorker
 from Pipeline import DataPipeline
+from Binary_Model import BinaryModelWorker
+from Binary_Pipeline import BinaryDataPipeline
 
 """
 A file to run from terminal to test and evaluate a model
@@ -17,10 +19,13 @@ import cv2
 
 
 if __name__ == '__main__':
-    pipe = DataPipeline()
-    model = ModelWorker(pipeline=pipe)
-    # model.demo()
-    model.tune()
+    # pipe = DataPipeline()
+    # model = ModelWorker(pipeline=pipe)
+    # model.tune()
     #model.evaluate()
     #model.save()
+    pipe = BinaryDataPipeline()
+    model = BinaryModelWorker(pipeline=pipe)
+    model.evaluate()
+    # model.tune()
     

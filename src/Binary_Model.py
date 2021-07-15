@@ -11,13 +11,15 @@ from tensorflow.python.data.ops.dataset_ops import make_one_shot_iterator
 from datetime import datetime
 import keras_tuner as kt
 from tensorflow.python.keras.metrics import AUC, Precision
+from sklearn.metrics import classification_report
 #define parameters in init, can steps be paused or resumed?
 #
+#get data from 33k set.
+# switch model to sigmoid single end
+# show imbalance
 #
 #
-#
-#
-class ModelWorker():
+class BinaryModelWorker():
     """
     A Convolutional Neural Network class wrapper for tf.keras
     """
@@ -35,36 +37,23 @@ class ModelWorker():
         """
         model = keras.Sequential()
         # model.add(input_layer = Input(shape=x.shape[1:]))
-        model.add(keras.layers.Conv2D(hp.Choice('conv1',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k1',[1,2,3,4]),strides=hp.Choice('s1',[1,2,3,4]),activation='relu',input_shape=(256,256,3)))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool1',[1,2,3] )))    
-        model.add(keras.layers.Dropout(hp.Choice('d1',[0.,.25,.5,.75] )))            
+        model.add(keras.layers.Conv2D(32,padding='same',kernel_size=3,activation='relu',input_shape=(64,64,3)))
+        model.add(keras.layers.MaxPool2D(pool_size=2))    
+        model.add(keras.layers.Dropout(.5))            
 
-        model.add(keras.layers.Conv2D(hp.Choice('conv2',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k2',[1,2,3,4]),strides=hp.Choice('s2',[1,2,3,4]),activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool2',[1,2,3] )))    
-        model.add(keras.layers.Dropout(hp.Choice('d2',[0.,.25,.5,.75] )))       
-
-        model.add(keras.layers.Conv2D(hp.Choice('conv3',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k3',[1,2,3,4]),strides=hp.Choice('s3',[1,2,3,4]),activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool3',[1,2,3 ])))    
-        model.add(keras.layers.Dropout(hp.Choice('d3',[0.,.25,.5,.75] )))  
-        
-        model.add(keras.layers.Conv2D(hp.Choice('conv4',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k4',[1,2,3,4]),strides=hp.Choice('s4',[1,2,3,4]),activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool4',[1,2,3] )))    
-        model.add(keras.layers.Dropout(hp.Choice('d4',[0.,.25,.5,.75] )))  
-
-        model.add(keras.layers.Conv2D(hp.Choice('conv5',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k5',[1,2,3,4]),strides=hp.Choice('s5',[1,2,3,4]),activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool5',[1,2,3]  ) ))    
-        model.add(keras.layers.Dropout(hp.Choice('d5',[0.,.25,.5,.75] )))            
+        model.add(keras.layers.Conv2D(64,padding='same',kernel_size=3,activation='relu'))
+        model.add(keras.layers.MaxPool2D(pool_size=2))    
 
         model.add(keras.layers.Flatten())
         # if(self.hp is not None):   
         #     model.add(keras.layers.Dense(hp.Choice('dense_layer',[64,128,256,512,1024]),activation='relu'))   
-        model.add(keras.layers.Dense(hp.Choice('dense_layer',[256,1024,20000]),activation='relu'))    
-        model.add(keras.layers.Dense(hp.Choice('las_dense_layer',[49,200,400,800]),activation='relu'))    
-        model.add(keras.layers.Dense(7,activation='softmax'))
+        model.add(keras.layers.Dense(1024,activation='relu'))    
+        model.add(keras.layers.Dense(64,activation='relu'))    
+        model.add(keras.layers.Dense(1,activation='sigmoid'))
         
         model.compile(optimizer=keras.optimizers.Adam(learning_rate=.3),
-                loss=keras.losses.CategoricalCrossentropy(),
-                metrics= [keras.metrics.Recall(thresholds=hp.Choice('thresh',[0.,.25,.5,.75]))] )#'acc', keras.metrics.AUC(),keras.metrics.Precision(), keras.metrics.Recall(thresholds=hp.Choice('thresh',[0.,.25,.5,.75] ))])#create parameter for
+                loss=keras.losses.BinaryCrossentropy(),
+                metrics=[keras.metrics.Accuracy(), keras.metrics.AUC(),keras.metrics.Precision(), keras.metrics.Recall()])#create parameter for
         
         return model
    
@@ -90,13 +79,18 @@ class ModelWorker():
         Args:
         eval_type = 'Val' | 'Test'
         """
-        self.model = self.build_model()
+        self.model = self.build_model(None)
         print(self.model.summary())
-        train,test = self.pipe.execute()#val,
+        train,val,test = self.pipe.execute()#val,
         print('starting fit')
-        self.model.fit(train,class_weight=self.pipe.weights, epochs=5,verbose=True)# validation_data=validation_data,validation_steps=1,
+        self.model.fit(train,validation_data=val, epochs=52,verbose=True)# validation_data=validation_data,validation_steps=1,
         print('ending fit')
         eval = self.model.evaluate(test)
+        pred = self.model.predict(test)
+        predicted = np.argmax(pred, axis=1)
+        report = classification_report(np.argmax(test['target'], axis=1), predicted)
+        print(report)
+        
         # self.report(eval)
 
         pass
@@ -104,17 +98,15 @@ class ModelWorker():
         """
         Use the parameter tuning hooks to pass in paramter sets
         """
-
         tuner = RandomSearch(
             self.build_model,
-            objective='val_loss',
-            max_trials=30
+            objective='val_accuracy',
+            max_trials=100,
+            overwrite = True
         )
-        train,val,test = self.pipe.execute()
-        self.pipe.get_all_data_gen()
-        tuner.search(train,epochs=3,validation_data=val,batch_size=32)
-        bm = tuner.get_best_models()[0]
-        bm.evaluate(test)
+        all_data = self.pipe.get_all_data_gen()
+        print(all_data.shape)
+        tuner.search(all_data,epochs=10,batch_size=32)
         tuner.get_best_models()[0].save('./models/' + str(datetime.ctime) + "___Best_Model")
         pass
     def save(self):
