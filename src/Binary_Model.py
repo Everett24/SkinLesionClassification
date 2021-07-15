@@ -36,7 +36,6 @@ class BinaryModelWorker():
         Create the model that will be used
         """
         model = keras.Sequential()
-        # model.add(input_layer = Input(shape=x.shape[1:]))
         model.add(keras.layers.Conv2D(32,padding='same',kernel_size=3,activation='relu',input_shape=(64,64,3)))
         model.add(keras.layers.MaxPool2D(pool_size=2))    
         model.add(keras.layers.Dropout(.5))            
@@ -81,9 +80,9 @@ class BinaryModelWorker():
         """
         self.model = self.build_model(None)
         print(self.model.summary())
-        train,val,test = self.pipe.execute()#val,
+        train,val,test = self.pipe.execute()
         print('starting fit')
-        self.model.fit(train,validation_data=val, epochs=52,verbose=True)# validation_data=validation_data,validation_steps=1,
+        self.model.fit(train,validation_data=val, epochs=52,verbose=True)
         print('ending fit')
         eval = self.model.evaluate(test)
         pred = self.model.predict(test)
@@ -91,8 +90,6 @@ class BinaryModelWorker():
         report = classification_report(np.argmax(test['target'], axis=1), predicted)
         print(report)
         
-        # self.report(eval)
-
         pass
     def tune(self):
         """
@@ -120,63 +117,4 @@ class BinaryModelWorker():
         Load the model stored in the directory
         """
         pass
-    def demo(self):
-        """
-        run a basic pass on a small data set
-        """
-        a = self.pipe.execute()
-        model = self.build_model()
-        # X_train = list(map(lambda x: x[0], b))
-        # y_train = list(map(lambda x: x[1], b))
-        # model.fit(X_train,y_train)
-        print(model.summary())
 
-        BATCH_SIZE = 50
-        # train_data = a.batch(BATCH_SIZE)#list(map(lambda x: x[0], a.batch(BATCH_SIZE)))
-        validation_data = a#.take(1)#.batch(BATCH_SIZE)#list(map(lambda x: x[0], b.batch(BATCH_SIZE))) 
-        # validation_data = validation_data.set_shape([32,32,3])
-        # print('validationdata  ' , validation_data)
-        # print('validationdata  ' , validation_data.next())
-        # .make_one_shot_iterator()
-
-        print('starting fit')
-        model.fit(validation_data, steps_per_epoch=self.pipe.len // 64,epochs=1,verbose=True)# validation_data=validation_data,validation_steps=1,
-        print('ending fit')
-        
-        arg = np.argmax(model.predict(validation_data,), axis=1)[0]
-        print( 'pred ______________',arg)
-        print(self.pipe.classes[arg])
-
-        
-
-
-#reference code from other project
-
-# def build_model(hp):
-#     model = keras.Sequential()
-    
-#     model.add(keras.layers.AveragePooling2D(6,3,input_shape=(300,300,1)))
-    
-#     model.add(keras.layers.Conv2D(64,3,activation='relu'))    
-#     model.add(keras.layers.Conv2D(32,3,activation='relu'))    
-#     model.add(keras.layers.Conv2D(16,3,activation='relu'))    
-    
-#     model.add(keras.layers.MaxPool2D(2,2))    
-#     model.add(keras.layers.Dropout(0.5))    
-    
-#     model.add(keras.layers.Flatten())    
-#     model.add(keras.layers.Dense(hp.Choice('dense_layer',[64,128,256,512,1024]),activation='relu'))    
-#     model.add(keras.layers.Dense(3,activation='softmax'))
-    
-#     model.compile(optimizer='adam',
-#              loss=keras.losses.SparseCategoricalCrossentropy(),
-#              metrics=['accuracy'])
-#     return model
-
-# tuner = RandomSearch(
-#     build_model,
-#     objective='val_accuracy',
-#     max_trials=5
-# )
-# tuner.search(ds,validation_data=(ds))
-# best_model = tuner.get_best_models()[0]

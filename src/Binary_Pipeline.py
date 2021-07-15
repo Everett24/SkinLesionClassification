@@ -45,10 +45,11 @@ class BinaryDataPipeline():
         
         df = df.drop_duplicates(subset=['patient_id'])
         df['image_name'] = df['image_name'].apply(lambda x: x + '.jpg')
+        
         #find a better place to do this
         self.classes = df['benign_malignant'].unique().tolist()
-        # self.weights = df.groupby('benign_malignant').size()/df.shape[0]
         self.len = len(df['benign_malignant'].values)
+        
         print(self.len)
         return df
         
@@ -63,7 +64,6 @@ class BinaryDataPipeline():
         log_image=True : print an image before dataset and test loop
         """
         train_full = self.load_df('./data/train.csv')
-        #train_full = train_full.sample(500)
         train_split,  test =  train_test_split(train_full,shuffle=False,test_size=.2)
         train,val = train_test_split(train_split,shuffle=False,test_size=.2)
         
@@ -71,7 +71,7 @@ class BinaryDataPipeline():
         val_generator = self.get_img_gen(val,'image_name','benign_malignant','data/jpeg/train/')
         test_generator = self.get_img_gen(test,'image_name','benign_malignant','data/jpeg/train/')
 
-        return train_generator,val_generator,test_generator #val_generator
+        return train_generator,val_generator,test_generator 
     
     def get_img_gen(self,df, x,y,dir,sub=None):
         test_datagen = ImageDataGenerator( 
