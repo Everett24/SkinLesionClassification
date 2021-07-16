@@ -1,6 +1,6 @@
 # SkinLesionClassification
 
-# This project is under heavy development and is not ready to be used at this time
+##### *This project is under heavy development and is not ready to be used at this time for anything serious*
 
 ## The Project
 This project looks at dirmetology images of skin lesions and classifies them into one of 7 categories.
@@ -24,3 +24,9 @@ This project looks at dirmetology images of skin lesions and classifies them as 
   Binary_Pipeline.py: A class used to load and preprocess binary data for the model <br />
   Bnary_Model.py: A class used to easily configure the binary CNN <br />
   runtime.py: A file used to cleanly create and test a model <br />
+
+
+### To Do:
+- Remove unused imports
+- Condense multi class and binary class models into one class
+- Add configuration to runtime.py
