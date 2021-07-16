@@ -4,15 +4,15 @@ from pandas.core.algorithms import mode
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-from tensorflow.keras.layers import ReLU
+# from tensorflow.keras.layers import ReLU
 from keras_tuner.tuners import RandomSearch
-from tensorflow.python import saved_model
-from tensorflow.python.data.ops.dataset_ops import make_one_shot_iterator
+# from tensorflow.python import saved_model
+# from tensorflow.python.data.ops.dataset_ops import make_one_shot_iterator
 from datetime import datetime
 import keras_tuner as kt
-from tensorflow.python.keras.metrics import AUC, Precision
-from sklearn.metrics import classification_report
-from keras.preprocessing import image
+# from tensorflow.python.keras.metrics import AUC, Precision
+# from sklearn.metrics import classification_report
+# from keras.preprocessing import image
 import matplotlib.pyplot as plt
 #
 class BinaryModelWorker():
@@ -33,22 +33,22 @@ class BinaryModelWorker():
         """
         model = keras.Sequential()
         
-        model.add(keras.layers.Conv2D(32,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
-        model.add(keras.layers.MaxPool2D(pool_size=2))    
-        model.add(keras.layers.Dropout(0.5))
+        model.add(layers.Conv2D(32,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
+        model.add(layers.MaxPool2D(pool_size=2))    
+        model.add(layers.Dropout(0.5))
 
-        model.add(keras.layers.Conv2D(64,padding='same',kernel_size=3,activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=2))    
+        model.add(layers.Conv2D(64,padding='same',kernel_size=3,activation='relu'))
+        model.add(layers.MaxPool2D(pool_size=2))    
         
-        model.add(keras.layers.Conv2D(128,padding='same',kernel_size=3,activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=2))   
+        model.add(layers.Conv2D(128,padding='same',kernel_size=3,activation='relu'))
+        model.add(layers.MaxPool2D(pool_size=2))   
 
-        model.add(keras.layers.Flatten())
+        model.add(layers.Flatten())
         # if(self.hp is not None):   
         #     model.add(keras.layers.Dense(hp.Choice('dense_layer',[64,128,256,512,1024]),activation='relu'))   
-        model.add(keras.layers.Dense(1024,activation='relu'))    
-        model.add(keras.layers.Dense(64,activation='relu'))    
-        model.add(keras.layers.Dense(1,activation='sigmoid'))
+        model.add(layers.Dense(1024,activation='relu'))    
+        model.add(layers.Dense(64,activation='relu'))    
+        model.add(layers.Dense(1,activation='sigmoid'))
         
         model.compile(optimizer=keras.optimizers.SGD(),
                 loss=keras.losses.BinaryCrossentropy(),

@@ -8,11 +8,11 @@ import tensorflow as tf
 # import tensorflow_datasets as tfds 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
-import os
-import cv2
-from glob import glob
-from keras.utils.np_utils import to_categorical
-from tensorflow.python.ops.gen_array_ops import split
+# import os
+# import cv2
+# from glob import glob
+# from keras.utils.np_utils import to_categorical
+# from tensorflow.python.ops.gen_array_ops import split
 
 # init pipeline with train and test dirs
 #   split train into validate

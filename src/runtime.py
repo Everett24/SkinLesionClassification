@@ -7,15 +7,7 @@ from Binary_Pipeline import BinaryDataPipeline
 A file to run from terminal to test and evaluate a model
 """
 
-import numpy as np
-import pandas as pd
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import tensorflow_datasets as tfds 
-import cv2
+# import tensorflow as tf
 
 
 if __name__ == '__main__':
@@ -27,7 +19,7 @@ if __name__ == '__main__':
     # tf.debugging.set_log_device_placement(True)
 
     # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-    print('GPUS DATA:    ',tf.config.list_physical_devices('GPU'))
+    # print('GPUS DATA:    ',tf.config.list_physical_devices('GPU'))
     # # Create some tensors
     # a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
     # b = tf.constant([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
