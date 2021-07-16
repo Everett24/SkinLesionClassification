@@ -14,6 +14,7 @@ import keras_tuner as kt
 # from sklearn.metrics import classification_report
 # from keras.preprocessing import image
 import matplotlib.pyplot as plt
+from sklearn.utils import resample
 #
 class BinaryModelWorker():
     """
@@ -33,29 +34,40 @@ class BinaryModelWorker():
         """
         model = keras.Sequential()
         
-        model.add(layers.Conv2D(32,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
+        model.add(layers.Conv2D(256,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
         model.add(layers.MaxPool2D(pool_size=2))    
-        model.add(layers.Dropout(0.5))
 
-        model.add(layers.Conv2D(64,padding='same',kernel_size=3,activation='relu'))
+        model.add(layers.Conv2D(128,padding='same',kernel_size=3,activation='relu'))
         model.add(layers.MaxPool2D(pool_size=2))    
         
-        model.add(layers.Conv2D(128,padding='same',kernel_size=3,activation='relu'))
-        model.add(layers.MaxPool2D(pool_size=2))   
+        model.add(layers.Conv2D(64,padding='same',kernel_size=3,activation='relu'))
+        model.add(layers.MaxPool2D(pool_size=2)) 
+        model.add(layers.Dropout(0.5))
+
 
         model.add(layers.Flatten())
         # if(self.hp is not None):   
         #     model.add(keras.layers.Dense(hp.Choice('dense_layer',[64,128,256,512,1024]),activation='relu'))   
-        model.add(layers.Dense(1024,activation='relu'))    
         model.add(layers.Dense(64,activation='relu'))    
         model.add(layers.Dense(1,activation='sigmoid'))
         
-        model.compile(optimizer=keras.optimizers.SGD(),
+        model.compile(optimizer=keras.optimizers.Adam(),
                 loss=keras.losses.BinaryCrossentropy(),
-                metrics=[keras.metrics.Recall(thresholds=[.35]),keras.metrics.Accuracy(),keras.metrics.Precision(),keras.metrics.AUC()])#create parameter for
+                metrics=[keras.metrics.Recall(),keras.metrics.Accuracy(),keras.metrics.Precision(),keras.metrics.AUC()])#create parameter for
         
         return model
-
+    def print_graph(self):
+        loss = self.history.history['loss']
+        val_loss = self.history.history['val_loss']
+        epochs = range(1, len(loss) + 1)
+        plt.plot(epochs, loss, 'y', label='Training loss')
+        plt.plot(epochs, val_loss, 'r', label='Validation loss')
+        plt.title('Training and validation loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
+        pass
     def evaluate(self):
         """
         Test the model and return a report
@@ -66,9 +78,11 @@ class BinaryModelWorker():
         print(self.model.summary())
         train,val,test = self.pipe.execute()
         print('starting fit')
-        self.model.fit(train,class_weight=self.pipe.weights, validation_data=val, epochs=1,verbose=True)
+        self.history = self.model.fit(train,class_weight=self.pipe.weights, validation_data=val, epochs=10,verbose=True)
         print('ending fit')
-        self.print_example(test)
+        
+        self.print_graph()
+        # self.print_example(test)
         eval = self.model.evaluate(test)
         
         
