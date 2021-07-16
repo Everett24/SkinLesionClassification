@@ -23,9 +23,32 @@ if __name__ == '__main__':
     # model = ModelWorker(pipeline=pipe)
     # model.tune()
     #model.evaluate()
-    #model.save()
+    # #model.save()
+    # tf.debugging.set_log_device_placement(True)
+
+    # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+    print('GPUS DATA:    ',tf.config.list_physical_devices('GPU'))
+    # # Create some tensors
+    # a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    # b = tf.constant([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+    # c = tf.matmul(a, b)
+
+    # print(c)
+
+
+
     pipe = BinaryDataPipeline()
+    
+    df = pipe.load_df('./data/train.csv')
+    print( df.groupby('target').size()/df.shape[0])
     model = BinaryModelWorker(pipeline=pipe)
     model.evaluate()
-    # model.tune()
+
+
+    #model.tune()
     
+
+    #test with a batch all of one class for each class
+    #test with an equal split of classes
+
+    #sudo apt install nvidia-cuda-toolkit

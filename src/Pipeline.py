@@ -24,7 +24,7 @@ class DataPipeline():
         Get the data from the directories; filterable
         """
         df = pd.read_csv(path)
-        df = df.drop_duplicates(subset=['lesion_id'])
+        # df = df.drop_duplicates(subset=['lesion_id'])
         df['image_id'] = df['image_id'].apply(lambda x: x + '.jpg')
         #find a better place to do this
         df = df.drop(df[df['dx'] == 'nv'].sample(frac=0.85).index)
@@ -71,9 +71,9 @@ class DataPipeline():
             x_col =x,
             y_col =y,
             color_mode="rgb",
-            target_size=(256, 256),
-            batch_size=200,
+            target_size=(600, 450),
             classes=self.classes,
+            batch_size=6,
             validate_filenames=False,
             shuffle=True,
             subset=sub)

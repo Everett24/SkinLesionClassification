@@ -12,12 +12,8 @@ from datetime import datetime
 import keras_tuner as kt
 from tensorflow.python.keras.metrics import AUC, Precision
 from sklearn.metrics import classification_report
-#define parameters in init, can steps be paused or resumed?
-#
-#get data from 33k set.
-# switch model to sigmoid single end
-# show imbalance
-#
+from keras.preprocessing import image
+import matplotlib.pyplot as plt
 #
 class BinaryModelWorker():
     """
@@ -36,12 +32,16 @@ class BinaryModelWorker():
         Create the model that will be used
         """
         model = keras.Sequential()
-        model.add(keras.layers.Conv2D(32,padding='same',kernel_size=3,activation='relu',input_shape=(64,64,3)))
+        
+        model.add(keras.layers.Conv2D(32,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
         model.add(keras.layers.MaxPool2D(pool_size=2))    
-        model.add(keras.layers.Dropout(.5))            
+        model.add(keras.layers.Dropout(0.5))
 
         model.add(keras.layers.Conv2D(64,padding='same',kernel_size=3,activation='relu'))
         model.add(keras.layers.MaxPool2D(pool_size=2))    
+        
+        model.add(keras.layers.Conv2D(128,padding='same',kernel_size=3,activation='relu'))
+        model.add(keras.layers.MaxPool2D(pool_size=2))   
 
         model.add(keras.layers.Flatten())
         # if(self.hp is not None):   
@@ -50,27 +50,11 @@ class BinaryModelWorker():
         model.add(keras.layers.Dense(64,activation='relu'))    
         model.add(keras.layers.Dense(1,activation='sigmoid'))
         
-        model.compile(optimizer=keras.optimizers.Adam(learning_rate=.3),
+        model.compile(optimizer=keras.optimizers.SGD(),
                 loss=keras.losses.BinaryCrossentropy(),
-                metrics=[keras.metrics.Accuracy(), keras.metrics.AUC(),keras.metrics.Precision(), keras.metrics.Recall()])#create parameter for
+                metrics=[keras.metrics.Recall(thresholds=[.35]),keras.metrics.Accuracy(),keras.metrics.Precision(),keras.metrics.AUC()])#create parameter for
         
         return model
-   
-    def report(self,metrics):
-        """
-        Create a text file containing all the metrics used to score
-        Return a list of length k for: TP,FP,TN,FN (Confusion Matrix)
-        """
-        report_sum = ''#self.model.summary()
-        report_scores = [str(m) for m in metrics] 
-        
-        rep_full = report_sum + '\n' + report_scores + '\n'
-        
-        file_name = '/logs/' + str(datetime.ctime()) + '.txt'
-        
-        f = open(file_name, "w")
-        f.write(rep_full)
-        f.close()
 
     def evaluate(self):
         """
@@ -82,15 +66,33 @@ class BinaryModelWorker():
         print(self.model.summary())
         train,val,test = self.pipe.execute()
         print('starting fit')
-        self.model.fit(train,validation_data=val, epochs=52,verbose=True)
+        self.model.fit(train,class_weight=self.pipe.weights, validation_data=val, epochs=1,verbose=True)
         print('ending fit')
+        self.print_example(test)
         eval = self.model.evaluate(test)
-        pred = self.model.predict(test)
-        predicted = np.argmax(pred, axis=1)
-        report = classification_report(np.argmax(test['target'], axis=1), predicted)
-        print(report)
+        
+        
+        # pred = self.model.predict(test)
+        # predicted = np.argmax(pred, axis=1)
+        # true = np.argmax(test['benign_malignant'].astype(int))
+        # report = list(zip(true,predicted))
+        #report = classification_report(np.argmax(test['benign_malignant'].astype(int)), predicted)
+        # print(report)
+
+        
         
         pass
+    def print_example(self,gen):
+        x,y = gen.next()
+        for i in range(0,1):
+            image = x[i]
+            proba = self.model.predict(image)
+            best = np.argsort(proba[0])[:-2:-1]    
+            plt.imshow(image.transpose(2,1,0))
+            for i in range(2):
+                print("{}".format(self.pipe.classes[best[i]])+" ({:.3})".format(proba[0][best[i]]))   
+            plt.show()
+
     def tune(self):
         """
         Use the parameter tuning hooks to pass in paramter sets

@@ -49,7 +49,11 @@ class BinaryDataPipeline():
         #find a better place to do this
         self.classes = df['benign_malignant'].unique().tolist()
         self.len = len(df['benign_malignant'].values)
-        
+        self.weights = (df.groupby('target').size()/df.shape[0]).to_dict()
+        temp = self.weights[0]
+        self.weights[0] = self.weights[1]/2
+        self.weights[1] = temp
+        print(type(self.weights))
         print(self.len)
         return df
         
@@ -89,9 +93,9 @@ class BinaryDataPipeline():
             directory=dir,
             x_col =x,
             y_col =y,
-            color_mode="rgb",
-            target_size=(64, 64),
-            batch_size=32,
+            color_mode="grayscale",
+            target_size=(32, 32),
+            batch_size=10,
             class_mode='binary',
             validate_filenames=False,
             shuffle=True,
