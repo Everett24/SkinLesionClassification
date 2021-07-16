@@ -1,6 +1,6 @@
 # SkinLesionClassification
 
-# This project is under heavy development and is not ready to be used at this time
+### This project is under heavy development and is not ready to be used at this time
 
 ## The Project
 This project looks at dirmetology images of skin lesions and classifies them into one of 7 categories.
