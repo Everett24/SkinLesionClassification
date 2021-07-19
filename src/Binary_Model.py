@@ -34,21 +34,21 @@ class BinaryModelWorker():
         """
         model = keras.Sequential()
         
-        model.add(layers.Conv2D(256,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
-        model.add(layers.MaxPool2D(pool_size=2))    
+        model.add(layers.Conv2D(16,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
+        # model.add(layers.MaxPool2D(pool_size=2))    
 
-        model.add(layers.Conv2D(128,padding='same',kernel_size=3,activation='relu'))
-        model.add(layers.MaxPool2D(pool_size=2))    
+        # model.add(layers.Conv2D(128,padding='same',kernel_size=3,activation='relu'))
+        # model.add(layers.MaxPool2D(pool_size=2))    
         
-        model.add(layers.Conv2D(64,padding='same',kernel_size=3,activation='relu'))
-        model.add(layers.MaxPool2D(pool_size=2)) 
-        model.add(layers.Dropout(0.5))
+        # model.add(layers.Conv2D(64,padding='same',kernel_size=3,activation='relu'))
+        # model.add(layers.MaxPool2D(pool_size=2)) 
+        # model.add(layers.Dropout(0.5))
 
 
         model.add(layers.Flatten())
         # if(self.hp is not None):   
         #     model.add(keras.layers.Dense(hp.Choice('dense_layer',[64,128,256,512,1024]),activation='relu'))   
-        model.add(layers.Dense(64,activation='relu'))    
+        # model.add(layers.Dense(64,activation='relu'))    
         model.add(layers.Dense(1,activation='sigmoid'))
         
         model.compile(optimizer=keras.optimizers.Adam(),

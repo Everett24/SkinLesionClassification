@@ -1,13 +1,15 @@
-# import numpy as np
+import numpy as np
 import pandas as pd
-# import tensorflow as tf
-
+import tensorflow as tf
+from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
+from sklearn.utils import resample
+from scipy import stats
+from sklearn.preprocessing import LabelEncoder
 # import os
 # import cv2
 # from glob import glob
-# from keras.utils.np_utils import to_categorical
 # from tensorflow.python.ops.gen_array_ops import split
 
 class DataPipeline():
@@ -31,12 +33,46 @@ class DataPipeline():
         self.classes = df['dx'].unique().tolist()
         self.weights = df.groupby('dx').size()/df.shape[0]
         self.len = len(df['dx'].values)
+
+
+        # label encoding to numeric values from text
+        le = LabelEncoder()
+        le.fit(df['dx'])
+        LabelEncoder()
+        print(list(le.classes_))
+        
+        df['label'] = le.transform(df["dx"]) 
+        print(df.sample(10))
+
         df = df.drop(['lesion_id','dx_type','age','sex','localization','dataset'],axis=1)
-        return df
+
+        df_0 = df[df['label'] == 0]
+        df_1 = df[df['label'] == 1]
+        df_2 = df[df['label'] == 2]
+        df_3 = df[df['label'] == 3]
+        df_4 = df[df['label'] == 4]
+        df_5 = df[df['label'] == 5]
+        df_6 = df[df['label'] == 6]
+
+        n_samples=500 
+        df_0_balanced = resample(df_0, replace=True, n_samples=n_samples, random_state=42) 
+        df_1_balanced = resample(df_1, replace=True, n_samples=n_samples, random_state=42) 
+        df_2_balanced = resample(df_2, replace=True, n_samples=n_samples, random_state=42)
+        df_3_balanced = resample(df_3, replace=True, n_samples=n_samples, random_state=42)
+        df_4_balanced = resample(df_4, replace=True, n_samples=n_samples, random_state=42)
+        df_5_balanced = resample(df_5, replace=True, n_samples=n_samples, random_state=42)
+        df_6_balanced = resample(df_6, replace=True, n_samples=n_samples, random_state=42)
+
+        #Combined back to a single dataframe
+        skin_df_balanced = pd.concat([df_0_balanced, df_1_balanced, 
+                                    df_2_balanced, df_3_balanced, 
+                                    df_4_balanced, df_5_balanced, df_6_balanced])
+
+        return skin_df_balanced
         
     def get_all_data_gen(self):
         train_full = self.load_df('./data/HAM10000_metadata')
-        train_generator = self.get_img_gen(train_full,'image_id','dx','data/HAM10000_images' )
+        train_generator = self.get_img_gen(train_full,'image_id','label','data/HAM10000_images' )
         return train_generator
 
     def execute(self):
@@ -71,7 +107,7 @@ class DataPipeline():
             x_col =x,
             y_col =y,
             color_mode="rgb",
-            target_size=(600, 450),
+            target_size=(32, 32),
             classes=self.classes,
             batch_size=6,
             validate_filenames=False,

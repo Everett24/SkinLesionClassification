@@ -24,42 +24,33 @@ class ModelWorker():
         self.model = None
         pass
    
-    def build_model(self,hp):
+    def build_model(self):
         """
         Create the model that will be used
         """
-        model = keras.Sequential()
+        model = keras.models.Sequential()
+        model.add(keras.layers.Conv2D(256, (3, 3), activation="relu", input_shape=(32, 32, 3)))
+        #model.add(BatchNormalization())
+        model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
+        model.add(keras.layers.Dropout(0.3))
 
-        model.add(keras.layers.Conv2D(hp.Choice('conv1',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k1',[1,2,3,4]),strides=hp.Choice('s1',[1,2,3,4]),activation='relu',input_shape=(256,256,3)))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool1',[1,2,3] )))    
-        model.add(keras.layers.Dropout(hp.Choice('d1',[0.,.25,.5,.75] )))            
+        model.add(keras.layers.Conv2D(128, (3, 3),activation='relu'))
+        #model.add(BatchNormalization())
+        model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
+        model.add(keras.layers.Dropout(0.3))
 
-        model.add(keras.layers.Conv2D(hp.Choice('conv2',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k2',[1,2,3,4]),strides=hp.Choice('s2',[1,2,3,4]),activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool2',[1,2,3] )))    
-        model.add(keras.layers.Dropout(hp.Choice('d2',[0.,.25,.5,.75] )))       
-
-        model.add(keras.layers.Conv2D(hp.Choice('conv3',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k3',[1,2,3,4]),strides=hp.Choice('s3',[1,2,3,4]),activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool3',[1,2,3 ])))    
-        model.add(keras.layers.Dropout(hp.Choice('d3',[0.,.25,.5,.75] )))  
-        
-        model.add(keras.layers.Conv2D(hp.Choice('conv4',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k4',[1,2,3,4]),strides=hp.Choice('s4',[1,2,3,4]),activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool4',[1,2,3] )))    
-        model.add(keras.layers.Dropout(hp.Choice('d4',[0.,.25,.5,.75] )))  
-
-        model.add(keras.layers.Conv2D(hp.Choice('conv5',[8,16,32,64]),padding='same',kernel_size=hp.Choice('k5',[1,2,3,4]),strides=hp.Choice('s5',[1,2,3,4]),activation='relu'))
-        model.add(keras.layers.MaxPool2D(pool_size=hp.Choice('pool5',[1,2,3]  ) ))    
-        model.add(keras.layers.Dropout(hp.Choice('d5',[0.,.25,.5,.75] )))            
-
+        model.add(keras.layers.Conv2D(64, (3, 3),activation='relu'))
+        #model.add(BatchNormalization())
+        model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
+        model.add(keras.layers.Dropout(0.3))
         model.add(keras.layers.Flatten())
-        # if(self.hp is not None):   
-        #     model.add(keras.layers.Dense(hp.Choice('dense_layer',[64,128,256,512,1024]),activation='relu'))   
-        model.add(keras.layers.Dense(hp.Choice('dense_layer',[256,1024,20000]),activation='relu'))    
-        model.add(keras.layers.Dense(hp.Choice('las_dense_layer',[49,200,400,800]),activation='relu'))    
-        model.add(keras.layers.Dense(7,activation='softmax'))
-        
-        model.compile(optimizer=keras.optimizers.Adam(learning_rate=.3),
+
+        model.add(keras.layers.Dense(32))
+        model.add(keras.layers.Dense(7, activation='softmax'))
+                
+        model.compile(optimizer=keras.optimizers.Adam(learning_rate=.001),
                 loss=keras.losses.CategoricalCrossentropy(),
-                metrics= [keras.metrics.Recall(thresholds=hp.Choice('thresh',[0.,.25,.5,.75]))] )#'acc', keras.metrics.AUC(),keras.metrics.Precision(), keras.metrics.Recall(thresholds=hp.Choice('thresh',[0.,.25,.5,.75] ))])#create parameter for
+                metrics= ['acc', keras.metrics.Recall()])#'acc', keras.metrics.AUC(),keras.metrics.Precision(), keras.metrics.Recall(thresholds=hp.Choice('thresh',[0.,.25,.5,.75] ))])#create parameter for
         
         return model
    
@@ -87,9 +78,9 @@ class ModelWorker():
         """
         self.model = self.build_model()
         print(self.model.summary())
-        train,test = self.pipe.execute()
+        train,val,test = self.pipe.execute()
         print('starting fit')
-        self.model.fit(train,class_weight=self.pipe.weights, epochs=5,verbose=True)
+        self.model.fit(train, epochs=5,validation_data=val,verbose=True)
         print('ending fit')
         eval = self.model.evaluate(test)
 

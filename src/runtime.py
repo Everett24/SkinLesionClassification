@@ -11,10 +11,10 @@ A file to run from terminal to test and evaluate a model
 
 
 if __name__ == '__main__':
-    # pipe = DataPipeline()
-    # model = ModelWorker(pipeline=pipe)
+    pipe = DataPipeline()
+    model = ModelWorker(pipeline=pipe)
     # model.tune()
-    #model.evaluate()
+    model.evaluate()
     # #model.save()
     # tf.debugging.set_log_device_placement(True)
 
@@ -29,12 +29,12 @@ if __name__ == '__main__':
 
 
 
-    pipe = BinaryDataPipeline()
+    # pipe = BinaryDataPipeline()
     
-    df = pipe.load_df('./data/train.csv')
-    print( df.groupby('target').size()/df.shape[0])
-    model = BinaryModelWorker(pipeline=pipe)
-    model.evaluate()
+    # df = pipe.load_df('./data/train.csv')
+    # print( df.groupby('target').size()/df.shape[0])
+    # model = BinaryModelWorker(pipeline=pipe)
+    # model.evaluate()
 
 
     #model.tune()
