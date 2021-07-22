@@ -27,8 +27,7 @@ This project looks at dirmetology images of skin lesions and classifies them as 
 
 
 ### To Do:
-- Remove unused imports
-- Condense multi class and binary class models into one class
-- Add configuration to runtime.py
-- Create a file for all models and pipelines tested **
-- Create a better model reporting /visualizing system
+- Condense multi class and binary class models into one class (in progress)
+- Add configuration to runtime.py (in progress)
+- Create a file for all models and pipelines tested **(in progress)
+- Create a better model reporting /visualizing system 

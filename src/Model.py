@@ -83,13 +83,13 @@ class ModelWorker():
         """
         self.model = self.bm()
         print(self.model)
-        # # self.model = self.build_model()
-        # print(self.model.summary())
-        # train,val,test = self.pipe.execute()
-        # print('starting fit')
-        # self.model.fit(train, epochs=500, validation_data=val, verbose=True)
-        # print('ending fit')
-        # eval = self.model.evaluate(test)
+        # self.model = self.build_model()
+        print(self.model.summary())
+        train,val,test = self.pipe.execute()
+        print('starting fit')
+        self.model.fit(train, epochs=500, validation_data=val, verbose=True)
+        print('ending fit')
+        eval = self.model.evaluate(test)
 
         pass
     def tune(self):
