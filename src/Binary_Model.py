@@ -4,15 +4,9 @@ from pandas.core.algorithms import mode
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-# from tensorflow.keras.layers import ReLU
 from keras_tuner.tuners import RandomSearch
-# from tensorflow.python import saved_model
-# from tensorflow.python.data.ops.dataset_ops import make_one_shot_iterator
 from datetime import datetime
 import keras_tuner as kt
-# from tensorflow.python.keras.metrics import AUC, Precision
-# from sklearn.metrics import classification_report
-# from keras.preprocessing import image
 import matplotlib.pyplot as plt
 from sklearn.utils import resample
 #

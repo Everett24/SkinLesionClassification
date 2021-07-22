@@ -1,32 +1,9 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-# from tensorflow import keras
-# from tensorflow.keras import layers
-# import matplotlib.pyplot as plt
-# import matplotlib.image as mpimg
-# import tensorflow_datasets as tfds 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
-# import os
-# import cv2
-# from glob import glob
-# from keras.utils.np_utils import to_categorical
-# from tensorflow.python.ops.gen_array_ops import split
 
-# init pipeline with train and test dirs
-#   split train into validate
-# load all the images for train,val,test
-# return 3 dataset objects named train,test,val
-# 
-# create a way to easily get sub sets of the data for HP tuning
-
-#create a bashh script to take a selected folder in downloads and extract it to the proper data format in the data folder of the project dir
-
-#load df and prep
-#load labels and prep
-#create image generator
-#init take paramters for batch and for count and for 
 class BinaryDataPipeline():
     """
     A class used for creating pipelines loading image data for classification

@@ -11,7 +11,7 @@ A file to run from terminal to test and evaluate a model
 
 
 if __name__ == '__main__':
-    pipe = DataPipeline()
+    pipe = DataPipeline('data/HAM10000_images')
     model = ModelWorker(pipeline=pipe)
     # model.tune()
     model.evaluate()
