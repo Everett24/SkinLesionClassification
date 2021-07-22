@@ -3,16 +3,20 @@ from tensorflow import keras
 from keras_tuner.tuners import RandomSearch
 from datetime import datetime
 
+from tensorflow.python.keras.utils.generic_utils import serialize_keras_class_and_config
+
 class ModelWorker():
     """
     A Convolutional Neural Network class wrapper for tf.keras
     """
-    def __init__(self,pipeline):
+    def __init__(self,pipeline,bm):
         """
         Initialize the CNN with data
         """
         self.pipe = pipeline
+        self.bm = bm
         self.model = None
+
         pass
    
     def build_model(self):
@@ -77,13 +81,15 @@ class ModelWorker():
         Args:
         eval_type = 'Val' | 'Test'
         """
-        self.model = self.build_model()
-        print(self.model.summary())
-        train,val,test = self.pipe.execute()
-        print('starting fit')
-        self.model.fit(train, epochs=500, validation_data=val, verbose=True)
-        print('ending fit')
-        eval = self.model.evaluate(test)
+        self.model = self.bm()
+        print(self.model)
+        # # self.model = self.build_model()
+        # print(self.model.summary())
+        # train,val,test = self.pipe.execute()
+        # print('starting fit')
+        # self.model.fit(train, epochs=500, validation_data=val, verbose=True)
+        # print('ending fit')
+        # eval = self.model.evaluate(test)
 
         pass
     def tune(self):

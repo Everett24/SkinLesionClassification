@@ -9,7 +9,7 @@ def Binary_BuildModel_Standard():
 def Binary_BuildModel_Deep():
     model = keras.Sequential()
         
-    model.add(keras.layers.Conv2D(16,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
+    model.add(keras.layers.Conv2D(256,padding='same',kernel_size=3,activation='relu',input_shape=(32,32,1)))
     model.add(keras.layers.MaxPool2D(pool_size=2))    
 
     model.add(keras.layers.Conv2D(128,padding='same',kernel_size=3,activation='relu'))
@@ -48,16 +48,16 @@ def MultiClass_BuildModel_Deep():
     model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
     model.add(keras.layers.Dropout(0.3))
 
-    model.add(keras.layers.Conv2D(128, (3, 3),activation='relu'))
-    #model.add(BatchNormalization())
-    model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
-    model.add(keras.layers.Dropout(0.3))
+    # model.add(keras.layers.Conv2D(128, (3, 3),activation='relu'))
+    # #model.add(BatchNormalization())
+    # model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
+    # model.add(keras.layers.Dropout(0.3))
 
-    model.add(keras.layers.Conv2D(64, (3, 3),activation='relu'))
-    #model.add(BatchNormalization())
-    model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
-    model.add(keras.layers.Dropout(0.3))
-    model.add(keras.layers.Flatten())
+    # model.add(keras.layers.Conv2D(64, (3, 3),activation='relu'))
+    # #model.add(BatchNormalization())
+    # model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
+    # model.add(keras.layers.Dropout(0.3))
+    # model.add(keras.layers.Flatten())
 
     model.add(keras.layers.Dense(32))
     model.add(keras.layers.Dense(7, activation='softmax'))

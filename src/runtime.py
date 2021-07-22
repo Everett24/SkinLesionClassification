@@ -2,6 +2,7 @@ from Model import ModelWorker
 from Pipeline import DataPipeline
 from Binary_Model import BinaryModelWorker
 from Binary_Pipeline import BinaryDataPipeline
+import My_Models as mm
 
 """
 A file to run from terminal to test and evaluate a model
@@ -19,11 +20,19 @@ A file to run from terminal to test and evaluate a model
 
 
 if __name__ == '__main__':
+    
+    '''
+        Create a build model function in My_Models
+        Create a data pipeline by passing in a image path
+        Create a model by passing in a pipeline and a build model function 
+    '''
+
+
     pipe = DataPipeline('data/HAM10000_images')
-    model = ModelWorker(pipeline=pipe)
+    model = ModelWorker(pipeline=pipe, bm=mm.MultiClass_BuildModel_Deep)
     # model.tune()
     model.evaluate()
-    # #model.save()
+    #model.save()
     # tf.debugging.set_log_device_placement(True)
 
     # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
