@@ -75,10 +75,11 @@ class DataPipeline():
         Load data and Return a Dataset
         log_image=True : print an image before dataset and test loop
         """
+        #split
         train_full = self.load_df('./data/HAM10000_metadata')
         train_split,  test =  train_test_split(train_full,shuffle=False,test_size=.2)
         train,val = train_test_split(train_split,shuffle=False,test_size=.2)
-        
+        #make generators
         train_generator = self.get_img_gen(train,'image_id','dx',self.path)
         val_generator = self.get_img_gen(val,'image_id','dx',self.path)
         test_generator = self.get_img_gen(test,'image_id','dx',self.path)

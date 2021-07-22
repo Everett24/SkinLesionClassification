@@ -7,7 +7,15 @@ from Binary_Pipeline import BinaryDataPipeline
 A file to run from terminal to test and evaluate a model
 """
 
-# import tensorflow as tf
+# My_Models.py -> 'Name'_Build_Model(): pass in hp if a 'tune' function is passed in with 'build_model'
+# Pass a function in to model
+# 
+#
+#
+#
+#
+#
+#
 
 
 if __name__ == '__main__':
