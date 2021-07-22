@@ -29,7 +29,17 @@ class ModelWorker():
         Create the model that will be used
         """
         model = keras.models.Sequential()
-        model.add(keras.layers.Conv2D(256, (3, 3), activation="relu", input_shape=(32, 32, 3)))
+        model.add(keras.layers.Conv2D(1024, (3, 3), activation="relu", input_shape=(32, 32, 3)))
+        #model.add(BatchNormalization())
+        model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
+        model.add(keras.layers.Dropout(0.3))
+
+        model.add(keras.layers.Conv2D(512, (3, 3),activation='relu'))
+        #model.add(BatchNormalization())
+        model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
+        model.add(keras.layers.Dropout(0.3))
+
+        model.add(keras.layers.Conv2D(256, (3, 3),activation='relu'))
         #model.add(BatchNormalization())
         model.add(keras.layers.MaxPool2D(pool_size=(2, 2)))  
         model.add(keras.layers.Dropout(0.3))
@@ -48,9 +58,9 @@ class ModelWorker():
         model.add(keras.layers.Dense(32))
         model.add(keras.layers.Dense(7, activation='softmax'))
                 
-        model.compile(optimizer=keras.optimizers.Adam(learning_rate=.001),
+        model.compile(optimizer=keras.optimizers.Adam(learning_rate=.00001),
                 loss=keras.losses.CategoricalCrossentropy(),
-                metrics= ['acc', keras.metrics.Recall()])#'acc', keras.metrics.AUC(),keras.metrics.Precision(), keras.metrics.Recall(thresholds=hp.Choice('thresh',[0.,.25,.5,.75] ))])#create parameter for
+                metrics= ['acc', keras.metrics.Recall(), keras.metrics.AUC(),keras.metrics.Precision()])#create parameter for
         
         return model
    
@@ -80,7 +90,7 @@ class ModelWorker():
         print(self.model.summary())
         train,val,test = self.pipe.execute()
         print('starting fit')
-        self.model.fit(train, epochs=5,validation_data=val,verbose=True)
+        self.model.fit(train, epochs=500, validation_data=val, verbose=True)
         print('ending fit')
         eval = self.model.evaluate(test)
 
